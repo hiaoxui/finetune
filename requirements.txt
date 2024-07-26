@@ -1,0 +1,12 @@
+torch>=2.4.0
+lightning>=2.3.3
+peft>=0.5.0
+datasets>=2.20.0
+transformers>=4.43.2
+numpy<2.0.0
+deepspeed>=0.14.4
+nltk
+tqdm
+pyyaml
+eyecite
+tensorboard
