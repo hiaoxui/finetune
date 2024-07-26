@@ -46,7 +46,7 @@ def main():
     parser.add_argument('--use-ref', action=BooleanOptionalAction, default=True)
     parser.add_argument('--n-val', default=1000, type=int)
 
-    parser.add_argument('--patience', type=int, default=5, help='early stop')
+    parser.add_argument('--patience', type=int, default=16, help='early stop')
     parser.add_argument('--check-interval', default=200, type=int)
     parser.add_argument('--save-top-k', default=10, type=int)
     parser.add_argument('--eff-bsz', default=32, type=int, help='effective batch size')
