@@ -15,6 +15,13 @@ filtered_out = [
     'Special tokens have been added in the vocabulary',
     'We detected that you are passing `past_key_values`',
     'Setting `pad_token_id` to `eos_token_id`',
+    'Please specify the CUTLASS repo directory',
+    'async_io',
+    'libaio',
+    'sparse_attn requires a torch version',
+    'using untested triton version',
+    'Missing logger folder',
+    'torch.cuda.amp.custom_fwd',
 ]
 
 for fo_ in filtered_out:
