@@ -13,6 +13,7 @@ from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 from lmft.modeling.ln_model import ReportGenerationModel
 from lmft.data_io.clerc import load_clerc_data
 from lmft.modeling.save_callback import GenerationSaver
+from lmft.utils.suppress_warnings import suppress
 
 
 def get_save_path(args, logger):
@@ -56,6 +57,7 @@ def main():
     parser.add_argument('--max-new', type=int, default=512)
 
     args = parser.parse_args()
+    suppress()
 
     if args.action == 'train':
         logger = pl_loggers.TensorBoardLogger(args.cache, args.exp)
