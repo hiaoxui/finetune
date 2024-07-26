@@ -77,7 +77,7 @@ def load_clerc_data(bsz: int, pretrained: str, max_length: int, use_ref: bool, s
             pretrained=pretrained, max_length=max_length, use_ref=use_ref, split=split,
         )
         ret.append(data.DataLoader(
-            ds, bsz, shuffle=(split == 'train' and shuffle), num_workers=1,
+            ds, bsz, shuffle=(split == 'train' and shuffle), num_workers=4,
             collate_fn=collate_fn, prefetch_factor=32
         ))
     return ret[0], ret[1]
