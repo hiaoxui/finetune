@@ -41,10 +41,11 @@ def main():
     parser.add_argument('--warmup', default=2000, type=int)
     parser.add_argument('--strategy', default="deepspeed", type=str, choices=['deepspeed', 'ddp'])
     parser.add_argument('--precision', default='bf16-mixed', type=str)
+    parser.add_argument('--lora', default=32, type=int)
 
     parser.add_argument('--max-length', default=6000, type=int)
     parser.add_argument('--use-ref', action=BooleanOptionalAction, default=True)
-    parser.add_argument('--n-val', default=1000, type=int)
+    parser.add_argument('--n-val', default=999999999999, type=int)
 
     parser.add_argument('--patience', type=int, default=16, help='early stop')
     parser.add_argument('--check-interval', default=200, type=int)
@@ -67,7 +68,7 @@ def main():
                 save_last=True, filename='{step:06d}', auto_insert_metric_name=False,
             ),
             LearningRateMonitor('step'),
-            EarlyStopping(monitor='dev_loss', min_delta=1e-4, patience=args.patience, verbose=True),
+            EarlyStopping(monitor='dev_loss', min_delta=1e-4, patience=args.patience, verbose=False),
         ]
     elif args.action == 'test':
         logger = pl_loggers.TensorBoardLogger(os.path.join('/tmp/reportgen', args.exp))
@@ -106,7 +107,7 @@ def main():
 
     if args.ckpt is None:
         model = ReportGenerationModel(
-            pretrained=args.pretrained, lr=args.lr, warmup=args.warmup, lora_rank=32,
+            pretrained=args.pretrained, lr=args.lr, warmup=args.warmup, lora_rank=args.lora,
             max_new=args.max_new
         )
     else:
@@ -117,8 +118,11 @@ def main():
         model = ReportGenerationModel.load_from_checkpoint(args.ckpt, strict=False)
 
     if args.data == 'clerc':
+        if args.action == 'predict':
+            args.n_val = 9999999
         train_dl, test_dl = load_clerc_data(
-            bsz=1, pretrained=args.pretrained, max_length=args.max_length, shuffle=True, use_ref=args.use_ref
+            bsz=1, pretrained=args.pretrained, max_length=args.max_length, shuffle=True, use_ref=args.use_ref,
+            n_val=args.n_val,
         )
     else:
         raise NotImplementedError

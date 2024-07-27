@@ -11,12 +11,17 @@ from .utils import collate_fn
 class ClercDataset(LazyDataset, LazyTokenizer):
     def __init__(
             self, pretrained: str, split: str, max_length: int, use_ref: bool = True,
+            max_size: int = 999999999999,
     ):
         super().__init__(('jhu-clsp/CLERC',), {'data_dir': 'generation'}, split=split)
         self.pretrained, self.max_length, self.use_ref = pretrained, max_length, use_ref
         self.tokenizer_kwargs = {'truncation': True, 'padding': 'left', 'legacy': False}
         self.chat_factory = ChatFactory(self.pretrained, max_tokens=max_length)
         self.use_ref = use_ref
+        self.max_size = max_size
+
+    def __len__(self):
+        return min(self.max_size, super().__len__())
 
     def example_text(self, idx: int) -> Tuple[ChatInput, Dict[str, Any]]:
         # it constructs the prompt for text continuation
@@ -70,14 +75,21 @@ class ClercDataset(LazyDataset, LazyTokenizer):
         }
 
 
-def load_clerc_data(bsz: int, pretrained: str, max_length: int, use_ref: bool, shuffle: bool):
-    ret = []
-    for split in ['train', 'test']:
-        ds = ClercDataset(
-            pretrained=pretrained, max_length=max_length, use_ref=use_ref, split=split,
-        )
-        ret.append(data.DataLoader(
-            ds, bsz, shuffle=(split == 'train' and shuffle), num_workers=4,
-            collate_fn=collate_fn, prefetch_factor=32
-        ))
-    return ret[0], ret[1]
+def load_clerc_data(
+        bsz: int, pretrained: str, max_length: int, use_ref: bool, shuffle: bool, n_val: int
+) -> Tuple[data.DataLoader, data.DataLoader]:
+    # training
+    train_data = ClercDataset(
+        pretrained=pretrained, max_length=max_length, use_ref=use_ref, split='train', max_size=99999999999999
+    )
+    train_loader = data.DataLoader(
+        train_data, batch_size=bsz, shuffle=shuffle, num_workers=4, collate_fn=collate_fn, prefetch_factor=32
+    )
+    # test
+    test_data = ClercDataset(
+        pretrained=pretrained, max_length=max_length, use_ref=use_ref, split='test', max_size=n_val
+    )
+    test_loader = data.DataLoader(
+        test_data, batch_size=bsz, shuffle=False, num_workers=4, collate_fn=collate_fn, prefetch_factor=32
+    )
+    return train_loader, test_loader
