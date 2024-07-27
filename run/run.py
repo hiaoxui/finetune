@@ -10,7 +10,7 @@ from lightning.pytorch.plugins import DeepSpeedPrecision
 from lightning.pytorch.utilities.deepspeed import convert_zero_checkpoint_to_fp32_state_dict
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 
-from lmft.modeling.ln_model import ReportGenerationModel
+from lmft.modeling.ln_model import LMTrainer
 from lmft.data_io.clerc import load_clerc_data
 from lmft.modeling.save_callback import GenerationSaver
 from lmft.utils.suppress_warnings import suppress
@@ -106,7 +106,7 @@ def main():
     )
 
     if args.ckpt is None:
-        model = ReportGenerationModel(
+        model = LMTrainer(
             pretrained=args.pretrained, lr=args.lr, warmup=args.warmup, lora_rank=args.lora,
             max_new=args.max_new
         )
@@ -115,7 +115,7 @@ def main():
             new_ckpt_path = args.ckpt.replace('.ckpt', '.ln.ckpt')
             convert_zero_checkpoint_to_fp32_state_dict(args.ckpt, new_ckpt_path)
             args.ckpt = new_ckpt_path
-        model = ReportGenerationModel.load_from_checkpoint(args.ckpt, strict=False)
+        model = LMTrainer.load_from_checkpoint(args.ckpt, strict=False)
 
     if args.data == 'clerc':
         if args.action == 'predict':
