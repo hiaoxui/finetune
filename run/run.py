@@ -97,7 +97,7 @@ def main():
     else:
         gpu_kwargs = {'accelerator': 'cpu'}
 
-    accumulate = args.eff_bsz // (args.n_gpu+0.1)
+    accumulate = max(args.eff_bsz // (args.n_gpu+0.1), 1)
     trainer = Trainer(
         log_every_n_steps=20, use_distributed_sampler=args.n_gpu > 1, gradient_clip_val=.8,
         gradient_clip_algorithm='norm', max_epochs=128, logger=logger, enable_progress_bar=True,
