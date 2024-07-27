@@ -61,7 +61,11 @@ class ClercDataset(LazyDataset, LazyTokenizer):
                 ),
             ])
 
-        assistant_chat = Chat(role='assistant', parts=[ChatPart(ex['gold_text'], prefix_split=True)])
+        assistant_chat = Chat(
+            role='assistant', parts=[
+                ChatPart('<answer>' + ex['gold_text'] + '</answer>', prefix_split=True)
+            ]
+        )
         chats = ChatInput([user_chat, assistant_chat])
         meta = {'gold_text': ex['gold_text'], 'docid': ex['docid'], 'index': (self._split, idx)}
         return chats, meta
