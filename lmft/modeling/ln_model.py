@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 import torch
 from lightning.pytorch.strategies import DeepSpeedStrategy
 from torch import Tensor
@@ -8,7 +10,7 @@ from lightning.pytorch.utilities.types import OptimizerLRScheduler
 from lmft.utils.params import param_to_buffer
 
 
-class ReportGenerationModel(LightningModule):
+class LMTrainer(LightningModule):
     def __init__(self, pretrained: str, lora_rank: int, warmup: int, lr: float, max_new: int = 768):
         super().__init__()
         self.pretrained, self.lora_rank, self.max_new = pretrained, lora_rank, max_new
@@ -18,7 +20,9 @@ class ReportGenerationModel(LightningModule):
             target_modules=['q_proj', 'v_proj', 'o_proj'],
         )
         self.lora_model = get_peft_model(AutoModelForCausalLM.from_pretrained(pretrained), peft_config, 'lora_decoder')
-        param_to_buffer(self.lora_model)
+        self.trainable_parameters = None
+        self.get_trainable()
+        # param_to_buffer(self.lora_model)
         self.save_hyperparameters()
 
     def configure_optimizers(self) -> OptimizerLRScheduler:
@@ -71,4 +75,23 @@ class ReportGenerationModel(LightningModule):
             )
             gen = model_gen[0][len(input_ids):].cpu().tolist()
             ret.append(gen)
+        return ret
+
+    def get_trainable(self):
+        if self.trainable_parameters is not None:
+            return
+        self.trainable_parameters = set()
+        for n, p in self.named_parameters():
+            if p.requires_grad:
+                self.trainable_parameters.add(n)
+
+    def state_dict(self, *args, destination=None, prefix='', keep_vars=False):
+        if len(args) == 3:
+            destination, prefix, keep_vars = args
+        ret = super(LMTrainer, self).state_dict(destination=destination, prefix=prefix, keep_vars=keep_vars)
+        self.get_trainable()
+        if isinstance(ret, OrderedDict):
+            for k in list(ret):
+                if k[len(prefix):] not in self.trainable_parameters:
+                    ret.pop(k)
         return ret
