@@ -57,8 +57,11 @@ class MegaWika2Dataset(LazyDataset, LazyTokenizer):
 
     def __getitem__(self, idx: int):
         datum = self.data[idx]
-        meta = {'title': datum['article_title'], 'gold_text': datum['target_sentence']}
-        chats = self.example_text(datum)
+        meta = {
+            'title': datum['article_title'], 'gold_text': datum['target_sentence'],
+            'id': datum['id'],
+        }
+        chats = self.example_text(datum )
         processed = self.chat_factory.process(chats, return_text=False)
         return {
             'src_input_ids': None, 'tgt_input_ids': processed.input_ids,

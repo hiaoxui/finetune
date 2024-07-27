@@ -69,7 +69,10 @@ def main():
                 save_last=True, filename='{step:06d}', auto_insert_metric_name=False,
             ),
             LearningRateMonitor('step'),
-            EarlyStopping(monitor='dev_loss', min_delta=1e-4, patience=args.patience, verbose=False),
+            EarlyStopping(
+                monitor='dev_loss', min_delta=1e-4, patience=args.patience, verbose=True,
+                log_rank_zero_only=True,
+            ),
         ]
     elif args.action == 'test':
         logger = pl_loggers.TensorBoardLogger(os.path.join('/tmp/reportgen', args.exp))
