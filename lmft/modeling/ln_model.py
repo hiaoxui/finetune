@@ -5,6 +5,7 @@ from lightning.pytorch import LightningModule
 from transformers import AutoModelForCausalLM
 from peft import get_peft_model, LoraConfig, TaskType
 from lightning.pytorch.utilities.types import OptimizerLRScheduler
+from lmft.utils.params import param_to_buffer
 
 
 class ReportGenerationModel(LightningModule):
@@ -17,6 +18,7 @@ class ReportGenerationModel(LightningModule):
             target_modules=['q_proj', 'v_proj', 'o_proj'],
         )
         self.lora_model = get_peft_model(AutoModelForCausalLM.from_pretrained(pretrained), peft_config, 'lora_decoder')
+        param_to_buffer(self.lora_model)
         self.save_hyperparameters()
 
     def configure_optimizers(self) -> OptimizerLRScheduler:
