@@ -22,7 +22,7 @@ class LMTrainer(LightningModule):
         self.lora_model = get_peft_model(AutoModelForCausalLM.from_pretrained(pretrained), peft_config, 'lora_decoder')
         self.trainable_parameters = None
         self.get_trainable()
-        # param_to_buffer(self.lora_model)
+        param_to_buffer(self.lora_model)
         self.save_hyperparameters()
 
     def configure_optimizers(self) -> OptimizerLRScheduler:
