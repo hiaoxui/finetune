@@ -49,8 +49,8 @@ def main():
     parser.add_argument('--n-val', default=999999999999, type=int)
 
     parser.add_argument('--patience', type=int, default=16, help='early stop')
-    parser.add_argument('--check-interval', default=200, type=int)
-    parser.add_argument('--save-top-k', default=10, type=int)
+    parser.add_argument('--check-interval', default=500, type=int)
+    parser.add_argument('--save-top-k', default=3, type=int)
     parser.add_argument('--eff-bsz', default=32, type=int, help='effective batch size')
     parser.add_argument('--n-gpu', default=8, type=int)
 
@@ -66,7 +66,7 @@ def main():
         callbacks = [
             ModelCheckpoint(
                 os.path.join(logger.log_dir, 'ckpt'), monitor='dev_loss', mode='min', save_top_k=args.save_top_k,
-                save_last=True, filename='{step:06d}', auto_insert_metric_name=False,
+                save_last=False, filename='{step:06d}', auto_insert_metric_name=False,
             ),
             LearningRateMonitor('step'),
             EarlyStopping(
