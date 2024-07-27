@@ -22,13 +22,13 @@ class MegaWika2Dataset(LazyDataset, LazyTokenizer):
         # it constructs the prompt for text continuation
         # it returns `ref_start` and `ref_end`, which indicates the char idx range of the references.
         # If we need to truncate the text, we consider truncating the reference parat.
-        prev, refs = dikt['previous_text'], dikt['citations']
+        prev, refs = dikt['previous_text'] + '\n\n', dikt['citations']
         if not self.use_ref:
             user_chat = Chat(role='user', parts=[
-                ChatPart(f'Below are text about "{dikt["article_title"]}":\n'),
-                ChatPart(prev, True, 'left', 200, 5),
+                ChatPart(prev, True, 'left', min_tokens=200, truncate_priority=5),
                 ChatPart(
-                    '\n\nContinue to write one more sentence following the style of my writeup. ' +
+                    f'Above is a text about "{dikt["article_title"]}". ' +
+                    'Continue to write one more sentence following the style of my writeup. ' +
                     'Wrap your answer with <answer></answer>. '
                 ),
             ])
@@ -39,18 +39,19 @@ class MegaWika2Dataset(LazyDataset, LazyTokenizer):
             ref_text = '\n'.join(ref_texts)
 
             user_chat = Chat(role='user', parts=[
-                ChatPart(f'Here is some texts about "{dikt["article_title"]}": \n'),
-                ChatPart(prev + '\n', True, 'left', 200, 5),
-                ChatPart('\n\nBelow are some references for my writeup:\n'),
-                ChatPart(ref_text, True, 'right', 0, 4),
+                ChatPart(prev, True, 'left', min_tokens=200, truncate_priority=5),
                 ChatPart(
-                    '\n\nAccording to these references, '
-                    'continue to write one more sentence following the style of my writeup. ' +
+                    f'Above is a text about "{dikt["article_title"]}". ' +
+                    'Continue to write one more sentence following the style of my writeup. ' +
+                    'You may use the reference information provided below: \n'
+                ),
+                ChatPart(ref_text, True, 'right', min_tokens=200, truncate_priority=2),
+                ChatPart(
                     'Wrap your answer with <answer></answer>. '
                 ),
             ])
 
-        gold_answer = f'<ans>{dikt["target_sentence"]}</ans>'
+        gold_answer = f'<answer>{dikt["target_sentence"]}</answer>'
         assistant_chat = Chat(role='assistant', parts=[ChatPart(gold_answer, prefix_split=True)])
         chats = ChatInput([user_chat, assistant_chat])
         return chats
@@ -61,7 +62,7 @@ class MegaWika2Dataset(LazyDataset, LazyTokenizer):
             'title': datum['article_title'], 'gold_text': datum['target_sentence'],
             'id': datum['id'],
         }
-        chats = self.example_text(datum )
+        chats = self.example_text(datum)
         processed = self.chat_factory.process(chats, return_text=False)
         return {
             'src_input_ids': None, 'tgt_input_ids': processed.input_ids,
