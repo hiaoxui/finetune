@@ -29,7 +29,7 @@ class MegaWika2Dataset(LazyDataset, LazyTokenizer):
                 ChatPart(
                     f'Above is a text about "{dikt["article_title"]}". ' +
                     'Continue to write one more sentence following the style of my writeup. ' +
-                    'Wrap your answer with <answer></answer>. '
+                    'You need to wrap your answer with <answer></answer>. '
                 ),
             ])
         else:
@@ -43,12 +43,10 @@ class MegaWika2Dataset(LazyDataset, LazyTokenizer):
                 ChatPart(
                     f'Above is a text about "{dikt["article_title"]}". ' +
                     'Continue to write one more sentence following the style of my writeup. ' +
-                    'You may use the reference information provided below: \n'
+                    'You need to wrap your answer with <answer></answer>. '
+                    'You may use the reference information provided below: \n\n'
                 ),
                 ChatPart(ref_text, True, 'right', min_tokens=200, truncate_priority=2),
-                ChatPart(
-                    'Wrap your answer with <answer></answer>. '
-                ),
             ])
 
         gold_answer = f'<answer>{dikt["target_sentence"]}</answer>'
