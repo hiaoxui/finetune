@@ -14,6 +14,7 @@ from lmft.modeling.ln_model import LMTrainer
 from lmft.data_io.clerc import load_clerc_data
 from lmft.modeling.save_callback import GenerationSaver
 from lmft.utils.suppress_warnings import suppress
+from lmft.data_io.megawika import load_megawika_data
 
 
 def get_save_path(args, logger):
@@ -31,7 +32,7 @@ def get_save_path(args, logger):
 def main():
     parser = ArgumentParser()
     parser.add_argument('action', choices=['train', 'predict'])
-    parser.add_argument('--data', type=str, required=True)
+    parser.add_argument('--data', type=str, required=True, choices=['megawika', 'clerc'])
     parser.add_argument('--pretrained', default='meta-llama/Meta-Llama-3.1-8B-Instruct')
 
     parser.add_argument('--cache', default='./cache')
@@ -125,7 +126,12 @@ def main():
             n_val=args.n_val,
         )
     else:
-        raise NotImplementedError
+        if args.action == 'predict':
+            args.n_val = 9999999
+        train_dl, test_dl = load_megawika_data(
+            bsz=1, pretrained=args.pretrained, max_length=args.max_length, shuffle=True, use_ref=args.use_ref,
+            n_val=args.n_val, test=(args.action == 'predict')
+        )
 
     if args.action == 'train':
         model.train()
