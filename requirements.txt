@@ -10,3 +10,4 @@ tqdm
 pyyaml
 eyecite
 tensorboard
+ujson

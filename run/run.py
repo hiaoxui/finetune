@@ -126,7 +126,6 @@ def main():
     if args.action == 'train':
         model.train()
         trainer.fit(model, train_dl, test_dl)
-        trainer.predict(model, test_dl)
     elif args.action == 'predict':
         trainer.predict(model, test_dl)
 
