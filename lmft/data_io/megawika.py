@@ -79,6 +79,6 @@ def load_megawika_data(
         pretrained=pretrained, max_length=max_length, use_ref=use_ref, split=split, max_size=n_val
     )
     test_loader = data.DataLoader(
-        test_data, batch_size=bsz, shuffle=False, num_workers=4, collate_fn=collate_fn, prefetch_factor=32
+        test_data, batch_size=bsz, shuffle=False, num_workers=16, collate_fn=collate_fn, prefetch_factor=32
     )
     return train_loader, test_loader

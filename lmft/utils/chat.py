@@ -131,9 +131,11 @@ class ChatFactory(LazyTokenizer):
         truncate_idx = 0
         while remove_left > 2:
             if truncate_idx >= len(trun_parts):
-                raise NotImplementedError
+                # cannot truncate it anymore; must abort
+                break
             part = trun_parts[truncate_idx]
             remove_left -= part.try_to_truncate(remove_left)
+            truncate_idx += 1
             if return_text:
                 part.content = self.tokenizer.decode(part.ids)
         
@@ -141,6 +143,7 @@ class ChatFactory(LazyTokenizer):
         if return_text:
             ret.chats = chat_input.tolist()
             ret.chat_str = self.tokenizer.decode(ret.input_ids)
+        ret.input_ids = ret.input_ids[:self.max_tokens]
 
         return ret
     
