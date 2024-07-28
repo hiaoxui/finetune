@@ -125,14 +125,14 @@ def main():
         if args.action == 'predict':
             args.n_val = 9999999
         train_dl, test_dl = load_clerc_data(
-            bsz=1, pretrained=args.pretrained, max_length=args.max_length, shuffle=True, use_ref=args.use_ref,
+            bsz=1, pretrained=args.pretrained, max_length=args.max_length, use_ref=args.use_ref,
             n_val=args.n_val,
         )
     else:
         if args.action == 'predict':
             args.n_val = 9999999
         train_dl, test_dl = load_megawika_data(
-            bsz=1, pretrained=args.pretrained, max_length=args.max_length, shuffle=True, use_ref=args.use_ref,
+            bsz=1, pretrained=args.pretrained, max_length=args.max_length, use_ref=args.use_ref,
             n_val=args.n_val, test=(args.action == 'predict')
         )
 

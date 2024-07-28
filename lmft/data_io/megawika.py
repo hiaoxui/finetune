@@ -56,20 +56,14 @@ class MegaWika2Dataset(LazyDataset, LazyTokenizer):
 
     def __getitem__(self, idx: int):
         datum = self.data[idx]
-        meta = {
-            'title': datum['article_title'], 'gold_text': datum['target_sentence'],
-            'id': datum['id'],
-        }
+        meta = {'title': datum['article_title'], 'gold_text': datum['target_sentence'], 'id': datum['id']}
         chats = self.example_text(datum)
         processed = self.chat_factory.process(chats, return_text=False)
-        return {
-            'src_input_ids': None, 'tgt_input_ids': processed.input_ids,
-            'skip': processed.prefix, 'meta': meta,
-        }
+        return {'input_ids': processed.input_ids, 'skip': processed.prefix, 'meta': meta}
 
 
 def load_megawika_data(
-        bsz: int, pretrained: str, max_length: int, use_ref: bool, shuffle: bool, n_val: int,
+        bsz: int, pretrained: str, max_length: int, use_ref: bool, n_val: int,
         test: bool
 ) -> Tuple[data.DataLoader, data.DataLoader]:
     # training
@@ -77,7 +71,7 @@ def load_megawika_data(
         pretrained=pretrained, max_length=max_length, use_ref=use_ref, split='train', max_size=99999999
     )
     train_loader = data.DataLoader(
-        train_data, batch_size=bsz, shuffle=shuffle, num_workers=4, collate_fn=collate_fn, prefetch_factor=32
+        train_data, batch_size=bsz, shuffle=False, num_workers=4, collate_fn=collate_fn, prefetch_factor=32
     )
     # test
     split = 'validation' if not test else 'test'

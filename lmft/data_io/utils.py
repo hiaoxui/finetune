@@ -10,7 +10,7 @@ def collate_fn(batch):
         return torch.tensor(ids), mask
 
     ret = dict()
-    ret['input_ids'], ret['attention_mask'] = pad_seqs([item['tgt_input_ids'] for item in batch])
+    ret['input_ids'], ret['attention_mask'] = pad_seqs([item['input_ids'] for item in batch])
     if 'skip' in batch[0]:
         ret['skip'] = torch.tensor([inp['skip'] for inp in batch])
     if 'meta' in batch[0]:
